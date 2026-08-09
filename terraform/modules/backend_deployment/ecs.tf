@@ -154,10 +154,11 @@ resource "aws_ecs_task_definition" "api" {
 }
 
 resource "aws_ecs_service" "api" {
-  name            = "${local.name_prefix}-api-service"
-  cluster         = aws_ecs_cluster.api.id
-  task_definition = aws_ecs_task_definition.api.arn
-  desired_count   = var.initial_desired_count
+  name                 = "${local.name_prefix}-api-service"
+  cluster              = aws_ecs_cluster.api.id
+  task_definition      = aws_ecs_task_definition.api.arn
+  desired_count        = var.initial_desired_count
+  force_new_deployment = true
   # launch_type     = "FARGATE"
 
   platform_version = "LATEST"
@@ -170,10 +171,10 @@ resource "aws_ecs_service" "api" {
   }
 
   capacity_provider_strategy {
-  capacity_provider = var.environment == "dev" ? "FARGATE_SPOT" : "FARGATE"
-  base              = 0
-  weight            = 1
-}
+    capacity_provider = var.environment == "dev" ? "FARGATE_SPOT" : "FARGATE"
+    base              = 0
+    weight            = 1
+  }
 
   network_configuration {
     subnets          = var.public_subnet_ids
