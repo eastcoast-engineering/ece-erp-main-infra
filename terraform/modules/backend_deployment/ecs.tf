@@ -97,6 +97,14 @@ resource "aws_ecs_task_definition" "api" {
             value = aws_s3_bucket.files.id
           },
           {
+            name  = "CHAT_S3_BUCKET"
+            value = aws_s3_bucket.chat.id
+          },
+          {
+            name  = "CHAT_S3_REGION"
+            value = var.aws_region
+          },
+          {
             name  = "S3_REGION"
             value = var.aws_region
           },

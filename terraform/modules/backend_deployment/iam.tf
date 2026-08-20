@@ -68,6 +68,27 @@ data "aws_iam_policy_document" "backend_storage" {
     ]
     resources = ["${aws_s3_bucket.files.arn}/*"]
   }
+
+  statement {
+    sid    = "InspectChatBucket"
+    effect = "Allow"
+    actions = [
+      "s3:GetBucketLocation",
+      "s3:ListBucket",
+    ]
+    resources = [aws_s3_bucket.chat.arn]
+  }
+
+  statement {
+    sid    = "ManageChatAttachments"
+    effect = "Allow"
+    actions = [
+      "s3:DeleteObject",
+      "s3:GetObject",
+      "s3:PutObject",
+    ]
+    resources = ["${aws_s3_bucket.chat.arn}/*"]
+  }
 }
 
 resource "aws_iam_role_policy" "backend_storage" {

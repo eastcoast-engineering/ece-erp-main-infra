@@ -100,3 +100,17 @@ variable "tags" {
   type        = map(string)
   default     = {}
 }
+
+variable "password_rotation_enabled" {
+  description = "Whether RDS manages and automatically rotates the master user password."
+  type        = bool
+  default     = true
+}
+
+variable "database_password" {
+  description = "Static PostgreSQL master password. Required when password_rotation_enabled is false."
+  type        = string
+  sensitive   = true
+  default     = null
+  nullable    = true
+}

@@ -92,6 +92,13 @@ variable "storage_bucket_name" {
   nullable    = true
 }
 
+variable "chat_storage_bucket_name" {
+  description = "Optional globally unique private chat attachment bucket name."
+  type        = string
+  default     = null
+  nullable    = true
+}
+
 variable "storage_cors_allowed_origins" {
   description = "Frontend origins allowed to upload through S3 presigned URLs."
   type        = list(string)

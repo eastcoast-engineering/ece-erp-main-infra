@@ -75,11 +75,16 @@ module "database" {
 
   database_name     = var.database_name
   database_username = var.database_username
-  engine_version    = var.database_engine_version
-  instance_class    = var.database_instance_class
+
+  password_rotation_enabled = var.database_password_rotation_enabled
+  database_password         = var.database_password
+
+  engine_version = var.database_engine_version
+  instance_class = var.database_instance_class
 
   allocated_storage     = var.database_allocated_storage
   max_allocated_storage = var.database_max_allocated_storage
+
   backup_retention_days = var.database_backup_retention_days
   multi_az              = var.database_multi_az
 
@@ -114,16 +119,17 @@ module "backend" {
   database_ssl_mode   = var.database_ssl_mode
 
   storage_bucket_name          = var.backend_storage_bucket_name
+  chat_storage_bucket_name     = var.backend_chat_storage_bucket_name
   storage_cors_allowed_origins = var.backend_storage_cors_allowed_origins
   secret_recovery_window_days  = var.backend_secret_recovery_window_days
 
-  container_port        = var.backend_container_port
-  health_check_path     = var.backend_health_check_path
-  task_cpu              = var.backend_task_cpu
-  task_memory           = var.backend_task_memory
-  initial_desired_count = var.backend_initial_desired_count
-  container_environment = var.backend_container_environment
-  ecr_force_delete      = true
+  container_port            = var.backend_container_port
+  health_check_path         = var.backend_health_check_path
+  task_cpu                  = var.backend_task_cpu
+  task_memory               = var.backend_task_memory
+  initial_desired_count     = var.backend_initial_desired_count
+  container_environment     = var.backend_container_environment
+  ecr_force_delete          = true
   enable_container_insights = false
 }
 

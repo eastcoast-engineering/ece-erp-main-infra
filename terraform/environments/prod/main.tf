@@ -114,6 +114,7 @@ module "frontend_oidc" {
 #   database_ssl_mode   = var.database_ssl_mode
 
 #   storage_bucket_name          = var.backend_storage_bucket_name
+#   chat_storage_bucket_name     = var.backend_chat_storage_bucket_name
 #   storage_cors_allowed_origins = var.backend_storage_cors_allowed_origins
 #   secret_recovery_window_days  = var.backend_secret_recovery_window_days
 

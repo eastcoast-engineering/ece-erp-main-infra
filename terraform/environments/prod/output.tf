@@ -43,6 +43,10 @@ output "frontend_github_role_arn" {
 #   value = module.backend.storage_bucket_name
 # }
 
+# output "backend_chat_storage_bucket_name" {
+#   value = module.backend.chat_storage_bucket_name
+# }
+
 # output "backend_runtime_secret_arn" {
 #   value = module.backend.runtime_secret_arn
 # }

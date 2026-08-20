@@ -23,10 +23,10 @@ backend_container_port        = 8080
 backend_health_check_path     = "/health"
 backend_task_cpu              = 512
 backend_task_memory           = 1024
-backend_initial_desired_count = 0
+backend_initial_desired_count = 1
 
 backend_container_environment = {
-  RUST_LOG = "info"
+  RUST_LOG           = "info"
   AWS_SES_FROM_EMAIL = "noreply@eastcoast.engineering",
   AWS_SES_FROM_NAME  = "Quota Shark"
 }
@@ -45,6 +45,8 @@ database_multi_az              = false
 database_deletion_protection   = true
 database_skip_final_snapshot   = false
 database_apply_immediately     = false
+
+database_password_rotation_enabled = true
 
 records = [
   {

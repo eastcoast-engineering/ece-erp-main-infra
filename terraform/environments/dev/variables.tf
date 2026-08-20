@@ -148,6 +148,13 @@ variable "backend_storage_bucket_name" {
   nullable    = true
 }
 
+variable "backend_chat_storage_bucket_name" {
+  description = "Optional globally unique development chat attachment bucket name."
+  type        = string
+  default     = null
+  nullable    = true
+}
+
 variable "backend_storage_cors_allowed_origins" {
   description = "Development browser origins allowed to use presigned S3 uploads."
   type        = list(string)
@@ -203,4 +210,19 @@ variable "database_skip_final_snapshot" {
 variable "database_apply_immediately" {
   type    = bool
   default = true
+}
+
+variable "database_password_rotation_enabled" {
+  description = "Whether RDS should manage and rotate the database master password."
+  type        = bool
+  default     = false
+}
+
+
+variable "database_password" {
+  description = "Static database password used when database_password_rotation_enabled is false."
+  type        = string
+  sensitive   = true
+  default     = null
+  nullable    = true
 }

@@ -156,6 +156,13 @@ variable "backend_storage_bucket_name" {
   nullable    = true
 }
 
+variable "backend_chat_storage_bucket_name" {
+  description = "Optional globally unique production chat attachment bucket name."
+  type        = string
+  default     = null
+  nullable    = true
+}
+
 variable "backend_storage_cors_allowed_origins" {
   description = "Production browser origins allowed to use presigned S3 uploads."
   type        = list(string)
@@ -216,6 +223,21 @@ variable "database_apply_immediately" {
 variable "frontend_github_subject_override" {
   description = "Exact GitHub OIDC subject for the frontend repository."
   type        = string
+  default     = null
+  nullable    = true
+}
+
+variable "database_password_rotation_enabled" {
+  description = "Whether RDS should manage and rotate the database master password."
+  type        = bool
+  default     = true
+}
+
+
+variable "database_password" {
+  description = "Static database password used when database_password_rotation_enabled is false."
+  type        = string
+  sensitive   = true
   default     = null
   nullable    = true
 }

@@ -17,6 +17,9 @@ apply:
 destroy:
 	cd $(TF_DIR) && terraform destroy -var-file="$(TF_VAR_FILE)"
 
+output:
+	cd $(TF_DIR) && terraform output -var-file="$(TF_VAR_FILE)"
+
 fmt:
 	terraform fmt -recursive
 

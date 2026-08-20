@@ -26,6 +26,7 @@ GitHub backend workflow (OIDC)
   -> ECS/Fargate API service
        -> private RDS PostgreSQL
        -> private, versioned S3 file bucket
+       -> separate private, versioned chat attachment bucket
        -> SES
 
 GitHub frontend workflow (OIDC)
@@ -41,6 +42,8 @@ Terraform creates:
 - an ECR repository, ECS cluster/service/task definition, ALB, logs, and DNS;
 - a private, encrypted, versioned backend file bucket with presigned-upload
   CORS and blocked public access;
+- a separate private, encrypted, versioned chat attachment bucket with the
+  same public-access block and presigned-upload CORS controls;
 - least-privilege ECS task/execution policies for S3, SES, and secrets;
 - separate GitHub OIDC roles for frontend and backend deployments.
 
@@ -62,6 +65,7 @@ The task also receives:
 - `ADDRESS=0.0.0.0` and `PORT=8080`;
 - `FILE_STORAGE_DRIVER=s3`;
 - `S3_BUCKET`, `AWS_S3_BUCKET`, `S3_REGION`, and `S3_PATH_STYLE=false`;
+- `CHAT_S3_BUCKET` and `CHAT_S3_REGION` for chat attachments only;
 - `JWT_SECRET`, `EMAIL_ENCRYPTION_KEY`, and
   `INTERGRATION_ENCRYPTION_KEY` from Secrets Manager;
 - `APP_ENV` and `RUST_LOG` for environment-specific behavior.
@@ -208,7 +212,8 @@ Then verify in AWS:
 - the ALB target is healthy;
 - RDS is available and not public;
 - the RDS master secret and backend runtime secret exist;
-- the backend file bucket has public access blocked and versioning enabled;
+- both the backend file bucket and dedicated chat attachment bucket have public
+  access blocked and versioning enabled;
 - an authenticated presigned upload can write and read a temporary object;
 - CloudWatch logs contain no missing-variable, database, S3, or migration
   errors.

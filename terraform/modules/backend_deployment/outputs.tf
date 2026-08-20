@@ -83,6 +83,16 @@ output "storage_bucket_arn" {
   value       = aws_s3_bucket.files.arn
 }
 
+output "chat_storage_bucket_name" {
+  description = "Private versioned bucket used exclusively for chat attachments."
+  value       = aws_s3_bucket.chat.id
+}
+
+output "chat_storage_bucket_arn" {
+  description = "ARN of the private chat attachment bucket."
+  value       = aws_s3_bucket.chat.arn
+}
+
 output "runtime_secret_arn" {
   description = "Secrets Manager ARN containing backend runtime cryptographic values."
   value       = aws_secretsmanager_secret.runtime.arn
