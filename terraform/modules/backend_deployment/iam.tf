@@ -105,7 +105,10 @@ data "aws_iam_policy_document" "backend_email" {
       "ses:SendEmail",
       "ses:SendRawEmail",
     ]
-    resources = ["*"]
+    resources = [
+      aws_ses_domain_identity.sender.arn,
+      aws_ses_email_identity.sender.arn,
+    ]
   }
 }
 

@@ -1,6 +1,7 @@
 locals {
   frontend_domain    = "${var.sub_domain}.${var.root_domain}"
   backend_api_domain = "api.${var.sub_domain}.${var.root_domain}"
+  workwife_domain    = "dev.workwife.app"
 }
 
 module "slave_dns" {
@@ -15,6 +16,13 @@ module "slave_dns" {
       zone_id  = module.frontend.cloudfront_zone_id
     }
   ]
+}
+
+module "workwife_dns" {
+  source = "../../modules/slave_dns"
+
+  subdomain     = local.workwife_domain
+  alias_records = []
 }
 
 module "frontend" {
@@ -104,6 +112,9 @@ module "backend" {
   domain_name           = local.backend_api_domain
   public_hosted_zone_id = module.slave_dns.zone_id
   api_public            = var.api_public
+  ses_sender_domain     = local.workwife_domain
+  ses_hosted_zone_id    = module.workwife_dns.zone_id
+  ses_from_email        = "mryoungtommy@gmail.com"
 
   vpc_id                          = module.backend_network.vpc_id
   public_subnet_ids               = module.backend_network.public_subnet_ids

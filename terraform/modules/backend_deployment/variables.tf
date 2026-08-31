@@ -23,6 +23,26 @@ variable "public_hosted_zone_id" {
   type        = string
 }
 
+variable "ses_sender_domain" {
+  description = "Verified SES domain used by the backend sender address."
+  type        = string
+}
+
+variable "ses_hosted_zone_id" {
+  description = "Route53 hosted zone that owns the SES sender domain DNS records."
+  type        = string
+}
+
+variable "ses_from_email" {
+  description = "Email address used as the backend SES From address."
+  type        = string
+
+  validation {
+    condition     = can(regex("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$", var.ses_from_email))
+    error_message = "ses_from_email must be a valid email address."
+  }
+}
+
 variable "api_public" {
   description = "Whether the ALB and API DNS record are public."
   type        = bool
@@ -157,6 +177,7 @@ variable "container_environment" {
         "ADDRESS",
         "APP_ENV",
         "AWS_REGION",
+        "AWS_SES_FROM_EMAIL",
         "AWS_S3_BUCKET",
         "DB_HOST",
         "DB_NAME",

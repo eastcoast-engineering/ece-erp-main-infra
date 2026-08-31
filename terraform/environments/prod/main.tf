@@ -1,5 +1,15 @@
 locals {
   backend_api_domain = "api.${var.root_domain}"
+  workwife_domain    = "workwife.app"
+}
+
+module "workwife_dns" {
+  source = "../../modules/master_dns"
+
+  root_domain   = local.workwife_domain
+  records       = []
+  delegations   = []
+  alias_records = []
 }
 
 module "master_dns" {
@@ -99,6 +109,9 @@ module "frontend_oidc" {
 #   domain_name           = local.backend_api_domain
 #   public_hosted_zone_id = module.master_dns.zone_id
 #   api_public            = var.api_public
+#   ses_sender_domain     = local.workwife_domain
+#   ses_hosted_zone_id    = module.workwife_dns.zone_id
+#   ses_from_email        = "mryoungtommy@gmail.com"
 
 #   vpc_id                          = module.backend_network.vpc_id
 #   public_subnet_ids               = module.backend_network.public_subnet_ids

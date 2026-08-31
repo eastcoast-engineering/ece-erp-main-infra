@@ -26,9 +26,8 @@ backend_task_memory           = 1024
 backend_initial_desired_count = 1
 
 backend_container_environment = {
-  RUST_LOG           = "info"
-  AWS_SES_FROM_EMAIL = "noreply@eastcoast.engineering",
-  AWS_SES_FROM_NAME  = "Quota Shark"
+  RUST_LOG          = "info"
+  AWS_SES_FROM_NAME = "Workwife"
 }
 
 database_public       = false

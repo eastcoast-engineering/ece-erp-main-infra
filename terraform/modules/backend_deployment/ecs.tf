@@ -85,6 +85,10 @@ resource "aws_ecs_task_definition" "api" {
             value = var.aws_region
           },
           {
+            name  = "AWS_SES_FROM_EMAIL"
+            value = var.ses_from_email
+          },
+          {
             name  = "FILE_STORAGE_DRIVER"
             value = "s3"
           },

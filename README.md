@@ -68,10 +68,16 @@ The task also receives:
 - `CHAT_S3_BUCKET` and `CHAT_S3_REGION` for chat attachments only;
 - `JWT_SECRET`, `EMAIL_ENCRYPTION_KEY`, and
   `INTERGRATION_ENCRYPTION_KEY` from Secrets Manager;
+- a Terraform-verified environment sender domain, DKIM, custom MAIL FROM DNS,
+  a separately verified sender mailbox, and `AWS_SES_FROM_EMAIL`;
 - `APP_ENV` and `RUST_LOG` for environment-specific behavior.
 
 The ECS task role supplies AWS credentials through the default AWS provider
 chain. Do not add static access keys to Terraform, ECS, or GitHub.
+
+SES uses `dev.workwife.app` in development and `workwife.app` in production.
+The current verified sender mailbox is `mryoungtommy@gmail.com`; mailbox
+verification is separate in each AWS account.
 
 ## Prerequisites
 
