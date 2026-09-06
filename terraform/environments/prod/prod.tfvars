@@ -1,5 +1,5 @@
 environment = "prod"
-root_domain = "quotashark.com"
+root_domain = "workwife.app"
 
 frontend_github_repo             = "eastcoast-engineering/ece-crm-main-frontend"
 frontend_github_branch           = "main"
@@ -26,15 +26,28 @@ backend_task_memory           = 1024
 backend_initial_desired_count = 1
 
 backend_container_environment = {
-  RUST_LOG          = "info"
-  AWS_SES_FROM_NAME = "Workwife"
+  RUST_LOG                                     = "info"
+  AWS_SES_FROM_NAME                            = "Workwife"
+  ACCESS_TOKEN_EXPIRATION_IN_MINUTE            = "15"
+  REFRESH_TOKEN_EXPIRATION_IN_DAYS             = "1"
+  REMEMBER_ME_REFRESH_TOKEN_EXPIRATION_IN_DAYS = "30"
+  PASSWORD_RESET_EXPIRATION_IN_HOURS           = "24"
+  RESEND_FROM_EMAIL                            = "onboarding@resend.dev"
+  FRONTEND_BASE_URL                            = "https://workwife.app"
+  FRONTEND_OAUTH_CALLBACK_URL                  = "https://workwife.app/auth/login"
+  OAUTH_GOOGLE_CLIENT_ID                       = "459345544672-in05gmjmjh76ggrm1me75t70hsh6e52n.apps.googleusercontent.com"
+  OAUTH_GOOGLE_REDIRECT_URI                    = "https://api.workwife.app/auth/oauth2/google/callback"
+  OAUTH_LINKEDIN_CLIENT_ID                     = "77ghsbh5oh9jcw"
+  OAUTH_LINKEDIN_REDIRECT_URI                  = "https://api.workwife.app/auth/oauth2/linkedin/callback"
+  COUNTRY_STATE_CITY_API_URL                   = "https://api.countrystatecity.in/v1"
+  FIREBASE_PROJECT_ID                          = "workwife-be805"
 }
 
 database_public       = false
 database_public_cidrs = []
 
-database_name                  = "quotashark"
-database_username              = "quotashark_admin"
+database_name                  = "workwife"
+database_username              = "workwife_admin"
 database_engine_version        = "16"
 database_instance_class        = "db.t4g.micro"
 database_allocated_storage     = 20
@@ -52,19 +65,19 @@ records = [
     name    = "www"
     type    = "CNAME"
     ttl     = 300
-    records = ["quotashark.com"]
+    records = ["workwife.app"]
   }
 ]
 
 # Replace these values whenever the dev hosted zone is recreated.
 delegations = [
   {
-    name = "dev.quotashark.com"
+    name = "dev.workwife.app"
     ns = [
-      "ns-520.awsdns-01.net",
-      "ns-9.awsdns-01.com",
-      "ns-1953.awsdns-52.co.uk",
-      "ns-1469.awsdns-55.org",
+      "ns-318.awsdns-39.com",
+      "ns-779.awsdns-33.net",
+      "ns-1218.awsdns-24.org",
+      "ns-1760.awsdns-28.co.uk",
     ]
   }
 ]

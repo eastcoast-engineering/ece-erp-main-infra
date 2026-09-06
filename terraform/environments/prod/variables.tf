@@ -13,7 +13,7 @@ variable "environment" {
 variable "root_domain" {
   description = "Root production domain."
   type        = string
-  default     = "quotashark.com"
+  default     = "workwife.app"
 }
 
 variable "frontend_github_repo" {
@@ -68,7 +68,7 @@ variable "backend_vpc_cidr" {
 }
 
 variable "api_public" {
-  description = "Whether api.quotashark.com is public."
+  description = "Whether api.workwife.app is public."
   type        = bool
   default     = true
 }
@@ -121,6 +121,13 @@ variable "backend_container_environment" {
   default     = {}
 }
 
+variable "backend_parameter_store_secrets" {
+  description = "Sensitive backend environment values stored as SSM SecureString parameters."
+  type        = map(string)
+  sensitive   = true
+  default     = {}
+}
+
 variable "database_public" {
   description = "Whether production PostgreSQL is publicly addressable."
   type        = bool
@@ -135,12 +142,12 @@ variable "database_public_cidrs" {
 
 variable "database_name" {
   type    = string
-  default = "quotashark"
+  default = "workwife"
 }
 
 variable "database_username" {
   type    = string
-  default = "quotashark_admin"
+  default = "workwife_admin"
 }
 
 variable "database_ssl_mode" {
@@ -166,13 +173,7 @@ variable "backend_chat_storage_bucket_name" {
 variable "backend_storage_cors_allowed_origins" {
   description = "Production browser origins allowed to use presigned S3 uploads."
   type        = list(string)
-  default     = ["https://quotashark.com", "https://www.quotashark.com"]
-}
-
-variable "backend_secret_recovery_window_days" {
-  description = "Recovery window for production backend runtime secrets."
-  type        = number
-  default     = 30
+  default     = ["https://workwife.app", "https://www.workwife.app"]
 }
 
 variable "database_engine_version" {

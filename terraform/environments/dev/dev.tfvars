@@ -1,5 +1,5 @@
 environment = "dev"
-root_domain = "quotashark.com"
+root_domain = "workwife.app"
 sub_domain  = "dev"
 
 frontend_github_repo             = "eastcoast-engineering/ece-crm-main-frontend"
@@ -22,8 +22,21 @@ backend_task_memory           = 1024
 backend_initial_desired_count = 1
 
 backend_container_environment = {
-  RUST_LOG          = "debug"
-  AWS_SES_FROM_NAME = "Workwife"
+  RUST_LOG                                     = "debug"
+  AWS_SES_FROM_NAME                            = "Workwife"
+  ACCESS_TOKEN_EXPIRATION_IN_MINUTE            = "15"
+  REFRESH_TOKEN_EXPIRATION_IN_DAYS             = "1"
+  REMEMBER_ME_REFRESH_TOKEN_EXPIRATION_IN_DAYS = "30"
+  PASSWORD_RESET_EXPIRATION_IN_HOURS           = "24"
+  RESEND_FROM_EMAIL                            = "onboarding@resend.dev"
+  FRONTEND_BASE_URL                            = "https://dev.workwife.app"
+  FRONTEND_OAUTH_CALLBACK_URL                  = "https://dev.workwife.app/auth/login"
+  OAUTH_GOOGLE_CLIENT_ID                       = "459345544672-in05gmjmjh76ggrm1me75t70hsh6e52n.apps.googleusercontent.com"
+  OAUTH_GOOGLE_REDIRECT_URI                    = "https://api.dev.workwife.app/auth/oauth2/google/callback"
+  OAUTH_LINKEDIN_CLIENT_ID                     = "77ghsbh5oh9jcw"
+  OAUTH_LINKEDIN_REDIRECT_URI                  = "https://api.dev.workwife.app/auth/oauth2/linkedin/callback"
+  COUNTRY_STATE_CITY_API_URL                   = "https://api.countrystatecity.in/v1"
+  FIREBASE_PROJECT_ID                          = "workwife-be805"
 }
 
 database_public = true

@@ -124,17 +124,6 @@ variable "storage_cors_allowed_origins" {
   type        = list(string)
 }
 
-variable "secret_recovery_window_days" {
-  description = "Secrets Manager recovery window for backend runtime secrets."
-  type        = number
-  default     = 30
-
-  validation {
-    condition     = var.secret_recovery_window_days == 0 || (var.secret_recovery_window_days >= 7 && var.secret_recovery_window_days <= 30)
-    error_message = "secret_recovery_window_days must be 0 or between 7 and 30."
-  }
-}
-
 variable "container_port" {
   description = "Actix container port."
   type        = number
@@ -199,10 +188,22 @@ variable "container_environment" {
   }
 }
 
+variable "container_secret_parameters" {
+  description = "Sensitive environment variables mapped to SSM SecureString parameter ARNs."
+  type        = map(string)
+  default     = {}
+}
+
 variable "log_retention_days" {
   description = "CloudWatch log retention period."
   type        = number
   default     = 30
+}
+
+variable "enable_cloudwatch_logs" {
+  description = "Enable paid ECS task log ingestion and storage in CloudWatch Logs."
+  type        = bool
+  default     = false
 }
 
 variable "ecr_force_delete" {

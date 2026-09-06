@@ -1,18 +1,8 @@
 locals {
   backend_api_domain = "api.${var.root_domain}"
-  workwife_domain    = "workwife.app"
 }
 
 module "workwife_dns" {
-  source = "../../modules/master_dns"
-
-  root_domain   = local.workwife_domain
-  records       = []
-  delegations   = []
-  alias_records = []
-}
-
-module "master_dns" {
   source = "../../modules/master_dns"
 
   root_domain = var.root_domain
@@ -33,13 +23,13 @@ module "frontend" {
 
   domain_name    = var.root_domain
   environment    = var.environment
-  hosted_zone_id = module.master_dns.zone_id
+  hosted_zone_id = module.workwife_dns.zone_id
 }
 
 module "frontend_oidc" {
   source = "../../modules/oidc"
 
-  project_name    = "quotashark"
+  project_name    = "workwife"
   environment     = var.environment
   deployment_type = "frontend"
 
@@ -57,10 +47,18 @@ module "frontend_oidc" {
   )
 }
 
+module "backend_secrets" {
+  source = "../../modules/secret_management"
+
+  project_name     = "workwife"
+  environment      = var.environment
+  parameter_values = var.backend_parameter_store_secrets
+}
+
 # module "backend_network" {
 #   source = "../../modules/backend_network"
 
-#   project_name   = "quotashark"
+#   project_name   = "workwife"
 #   environment    = var.environment
 #   vpc_cidr       = var.backend_vpc_cidr
 #   container_port = var.backend_container_port
@@ -76,7 +74,7 @@ module "frontend_oidc" {
 # module "database" {
 #   source = "../../modules/database"
 
-#   project_name = "quotashark"
+#   project_name = "workwife"
 #   environment  = var.environment
 
 #   public_subnet_ids   = module.backend_network.public_subnet_ids
@@ -102,14 +100,14 @@ module "frontend_oidc" {
 # module "backend" {
 #   source = "../../modules/backend_deployment"
 
-#   project_name = "quotashark"
+#   project_name = "workwife"
 #   environment  = var.environment
 #   aws_region   = var.aws_region
 
 #   domain_name           = local.backend_api_domain
-#   public_hosted_zone_id = module.master_dns.zone_id
+#   public_hosted_zone_id = module.workwife_dns.zone_id
 #   api_public            = var.api_public
-#   ses_sender_domain     = local.workwife_domain
+#   ses_sender_domain     = var.root_domain
 #   ses_hosted_zone_id    = module.workwife_dns.zone_id
 #   ses_from_email        = "mryoungtommy@gmail.com"
 
@@ -129,22 +127,23 @@ module "frontend_oidc" {
 #   storage_bucket_name          = var.backend_storage_bucket_name
 #   chat_storage_bucket_name     = var.backend_chat_storage_bucket_name
 #   storage_cors_allowed_origins = var.backend_storage_cors_allowed_origins
-#   secret_recovery_window_days  = var.backend_secret_recovery_window_days
 
 #   container_port        = var.backend_container_port
 #   health_check_path     = var.backend_health_check_path
 #   task_cpu              = var.backend_task_cpu
 #   task_memory           = var.backend_task_memory
 #   initial_desired_count = var.backend_initial_desired_count
-#   container_environment = var.backend_container_environment
+#   container_environment       = var.backend_container_environment
+#   container_secret_parameters = module.backend_secrets.parameter_arns
 #   ecr_force_delete      = false
+#   enable_cloudwatch_logs    = false
 #   enable_container_insights = false
 # }
 
 # module "backend_oidc" {
 #   source = "../../modules/oidc"
 
-#   project_name    = "quotashark"
+#   project_name    = "workwife"
 #   environment     = var.environment
 #   deployment_type = "backend"
 #   deployment_name = "backend"

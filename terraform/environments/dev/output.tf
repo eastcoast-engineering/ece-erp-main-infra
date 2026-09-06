@@ -47,12 +47,21 @@ output "backend_chat_storage_bucket_name" {
   value = module.backend.chat_storage_bucket_name
 }
 
-output "backend_runtime_secret_arn" {
-  value = module.backend.runtime_secret_arn
+output "backend_parameter_arns" {
+  description = "SSM SecureString parameter ARNs injected into the backend."
+  value       = module.backend_secrets.parameter_arns
 }
 
 output "dev_zone_name_servers" {
-  value = module.slave_dns.name_servers
+  value = module.workwife_dns.name_servers
+}
+
+output "frontend_bucket_name" {
+  value = module.frontend.bucket_name
+}
+
+output "frontend_cloudfront_distribution_id" {
+  value = module.frontend.cloudfront_distribution_id
 }
 
 output "database_credentials" {

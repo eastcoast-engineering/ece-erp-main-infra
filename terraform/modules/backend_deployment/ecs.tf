@@ -1,6 +1,6 @@
 resource "aws_cloudwatch_log_group" "api" {
   name              = "/ecs/${local.name_prefix}-api"
-  retention_in_days = var.log_retention_days
+  retention_in_days = var.enable_cloudwatch_logs ? var.log_retention_days : 1
 
   tags = local.common_tags
 }
@@ -31,7 +31,7 @@ resource "aws_ecs_task_definition" "api" {
   }
 
   container_definitions = jsonencode([
-    {
+    merge({
       name      = local.container_name
       image     = "${aws_ecr_repository.api.repository_url}:bootstrap"
       essential = true
@@ -125,25 +125,22 @@ resource "aws_ecs_task_definition" "api" {
         ]
       )
 
-      secrets = [
-        {
-          name      = "DB_PASSWORD"
-          valueFrom = "${var.database_secret_arn}:password::"
-        },
-        {
-          name      = "JWT_SECRET"
-          valueFrom = "${aws_secretsmanager_secret.runtime.arn}:JWT_SECRET::"
-        },
-        {
-          name      = "EMAIL_ENCRYPTION_KEY"
-          valueFrom = "${aws_secretsmanager_secret.runtime.arn}:EMAIL_ENCRYPTION_KEY::"
-        },
-        {
-          name      = "INTERGRATION_ENCRYPTION_KEY"
-          valueFrom = "${aws_secretsmanager_secret.runtime.arn}:INTERGRATION_ENCRYPTION_KEY::"
-        }
-      ]
+      secrets = concat(
+        [
+          {
+            name      = "DB_PASSWORD"
+            valueFrom = "${var.database_secret_arn}:password::"
+          }
+        ],
+        [
+          for key, parameter_arn in var.container_secret_parameters : {
+            name      = key
+            valueFrom = parameter_arn
+          }
+        ]
+      )
 
+      }, var.enable_cloudwatch_logs ? {
       logConfiguration = {
         logDriver = "awslogs"
 
@@ -153,14 +150,23 @@ resource "aws_ecs_task_definition" "api" {
           awslogs-stream-prefix = "api"
         }
       }
-    }
+    } : {})
   ])
 
   depends_on = [
     aws_iam_role_policy_attachment.ecs_execution,
     aws_iam_role_policy.runtime_secrets,
-    aws_secretsmanager_secret_version.runtime,
   ]
+
+  lifecycle {
+    precondition {
+      condition = length(setintersection(
+        toset(keys(var.container_environment)),
+        toset(keys(var.container_secret_parameters))
+      )) == 0
+      error_message = "A backend key cannot be supplied as both a plain environment variable and an SSM secret."
+    }
+  }
 
   tags = local.common_tags
 }
@@ -183,7 +189,7 @@ resource "aws_ecs_service" "api" {
   }
 
   capacity_provider_strategy {
-    capacity_provider = var.environment == "dev" ? "FARGATE_SPOT" : "FARGATE"
+    capacity_provider = "FARGATE"
     base              = 0
     weight            = 1
   }

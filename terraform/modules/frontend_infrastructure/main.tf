@@ -18,6 +18,10 @@ locals {
 resource "aws_s3_bucket" "frontend" {
   bucket        = local.bucket_name
   force_destroy = true
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "aws_s3_bucket_public_access_block" "frontend" {
@@ -175,6 +179,10 @@ resource "aws_cloudfront_function" "redirect_www" {
   comment = "Redirect www.${var.domain_name} to ${var.domain_name}"
   publish = true
 
+  lifecycle {
+    create_before_destroy = true
+  }
+
   code = <<EOF
 function handler(event) {
   var request = event.request;
@@ -196,8 +204,6 @@ function handler(event) {
 }
 EOF
 }
-
-
 
 
 

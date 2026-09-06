@@ -32,13 +32,13 @@ variable "publicly_accessible" {
 variable "database_name" {
   description = "Initial PostgreSQL database name."
   type        = string
-  default     = "quotashark"
+  default     = "workwife"
 }
 
 variable "database_username" {
   description = "PostgreSQL master username."
   type        = string
-  default     = "quotashark_admin"
+  default     = "workwife_admin"
 }
 
 variable "engine_version" {

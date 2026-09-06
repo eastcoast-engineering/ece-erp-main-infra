@@ -141,35 +141,3 @@ resource "aws_s3_bucket_lifecycle_configuration" "chat" {
     }
   }
 }
-
-resource "random_password" "runtime" {
-  for_each = {
-    jwt         = 64
-    email       = 32
-    integration = 32
-  }
-
-  length  = each.value
-  special = false
-}
-
-resource "aws_secretsmanager_secret" "runtime" {
-  name                    = "${local.name_prefix}/backend/runtime"
-  description             = "Runtime cryptographic secrets for the ${var.environment} Quotashark backend"
-  recovery_window_in_days = var.secret_recovery_window_days
-
-  tags = merge(local.common_tags, {
-    Name      = "${local.name_prefix}-backend-runtime"
-    Component = "BackendSecrets"
-  })
-}
-
-resource "aws_secretsmanager_secret_version" "runtime" {
-  secret_id = aws_secretsmanager_secret.runtime.id
-
-  secret_string = jsonencode({
-    JWT_SECRET                  = random_password.runtime["jwt"].result
-    EMAIL_ENCRYPTION_KEY        = random_password.runtime["email"].result
-    INTERGRATION_ENCRYPTION_KEY = random_password.runtime["integration"].result
-  })
-}

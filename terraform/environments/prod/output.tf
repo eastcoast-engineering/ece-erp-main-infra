@@ -2,6 +2,14 @@ output "frontend_github_role_arn" {
   value = module.frontend_oidc.role_arn
 }
 
+output "frontend_bucket_name" {
+  value = module.frontend.bucket_name
+}
+
+output "frontend_cloudfront_distribution_id" {
+  value = module.frontend.cloudfront_distribution_id
+}
+
 # output "backend_api_url" {
 #   value = module.backend.api_url
 # }
@@ -47,10 +55,11 @@ output "frontend_github_role_arn" {
 #   value = module.backend.chat_storage_bucket_name
 # }
 
-# output "backend_runtime_secret_arn" {
-#   value = module.backend.runtime_secret_arn
-# }
+output "backend_parameter_arns" {
+  description = "SSM SecureString parameter ARNs reserved for the production backend."
+  value       = module.backend_secrets.parameter_arns
+}
 
-# output "root_zone_name_servers" {
-#   value = module.master_dns.name_servers
-# }
+output "root_zone_name_servers" {
+  value = module.workwife_dns.name_servers
+}

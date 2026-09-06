@@ -24,13 +24,21 @@ resource "aws_iam_role_policy_attachment" "ecs_execution" {
 
 data "aws_iam_policy_document" "runtime_secrets" {
   statement {
-    sid     = "ReadBackendSecrets"
-    effect  = "Allow"
-    actions = ["secretsmanager:GetSecretValue"]
-    resources = [
-      var.database_secret_arn,
-      aws_secretsmanager_secret.runtime.arn,
-    ]
+    sid       = "ReadDatabaseSecret"
+    effect    = "Allow"
+    actions   = ["secretsmanager:GetSecretValue"]
+    resources = [var.database_secret_arn]
+  }
+
+  dynamic "statement" {
+    for_each = length(var.container_secret_parameters) == 0 ? [] : [1]
+
+    content {
+      sid       = "ReadBackendParameters"
+      effect    = "Allow"
+      actions   = ["ssm:GetParameters"]
+      resources = values(var.container_secret_parameters)
+    }
   }
 }
 
