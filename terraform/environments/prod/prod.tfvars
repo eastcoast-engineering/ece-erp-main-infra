@@ -1,13 +1,13 @@
 environment = "prod"
 root_domain = "workwife.app"
 
-frontend_github_repo             = "eastcoast-engineering/ece-crm-main-frontend"
+frontend_github_repo             = "eastcoast-engineering/ece-erp-main-frontend"
 frontend_github_branch           = "main"
-frontend_github_subject_override = "repo:eastcoast-engineering@247177585/ece-crm-main-frontend@1157935426:ref:refs/heads/main"
+frontend_github_subject_override = "repo:eastcoast-engineering@247177585/ece-erp-main-frontend@1157935426:ref:refs/heads/main"
 
-backend_github_repo             = "eastcoast-engineering/ece-crm-main-backend"
+backend_github_repo             = "eastcoast-engineering/ece-erp-main-backend"
 backend_github_branch           = "main"
-backend_github_subject_override = "repo:eastcoast-engineering@247177585/ece-crm-main-backend@1141383024:ref:refs/heads/main"
+backend_github_subject_override = "repo:eastcoast-engineering@247177585/ece-erp-main-backend@1141383024:ref:refs/heads/main"
 
 # For a GitHub repository created after July 15, 2026, set the exact immutable
 # subject shown by GitHub, for example:

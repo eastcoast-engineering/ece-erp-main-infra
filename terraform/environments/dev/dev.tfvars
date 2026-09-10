@@ -2,13 +2,13 @@ environment = "dev"
 root_domain = "workwife.app"
 sub_domain  = "dev"
 
-frontend_github_repo             = "eastcoast-engineering/ece-crm-main-frontend"
+frontend_github_repo             = "eastcoast-engineering/ece-erp-main-frontend"
 frontend_github_branch           = "dev"
-frontend_github_subject_override = "repo:eastcoast-engineering@247177585/ece-crm-main-frontend@1157935426:ref:refs/heads/dev"
+frontend_github_subject_override = "repo:eastcoast-engineering@247177585/ece-erp-main-frontend@1157935426:ref:refs/heads/dev"
 
-backend_github_repo             = "eastcoast-engineering/ece-crm-main-backend"
+backend_github_repo             = "eastcoast-engineering/ece-erp-main-backend"
 backend_github_branch           = "dev"
-backend_github_subject_override = "repo:eastcoast-engineering@247177585/ece-crm-main-backend@1141383024:ref:refs/heads/dev"
+backend_github_subject_override = "repo:eastcoast-engineering@247177585/ece-erp-main-backend@1141383024:ref:refs/heads/dev"
 
 api_public        = true
 backend_vpc_cidr  = "10.50.0.0/16"
