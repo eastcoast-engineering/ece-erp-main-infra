@@ -60,3 +60,6 @@ database_deletion_protection       = false
 database_skip_final_snapshot       = true
 database_apply_immediately         = true
 database_password_rotation_enabled = false
+
+# Local chat/file upload verification uses the same private development storage.
+backend_storage_cors_allowed_origins = ["https://dev.workwife.app", "http://localhost:4200", "http://127.0.0.1:4200"]
