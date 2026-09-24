@@ -73,6 +73,11 @@ output "ecs_task_role_arn" {
   value       = aws_iam_role.ecs_task.arn
 }
 
+output "cloudwatch_log_group_arn" {
+  description = "CloudWatch log group ARN for backend task output."
+  value       = aws_cloudwatch_log_group.api.arn
+}
+
 output "storage_bucket_name" {
   description = "Private versioned bucket used for backend files."
   value       = aws_s3_bucket.files.id
