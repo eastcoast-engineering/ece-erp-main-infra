@@ -168,4 +168,5 @@ module "backend_oidc" {
   ecs_task_definition_arn_pattern = module.backend.ecs_task_definition_arn_pattern
   ecs_task_execution_role_arn     = module.backend.ecs_task_execution_role_arn
   ecs_task_role_arn               = module.backend.ecs_task_role_arn
+  cloudwatch_log_group_arn        = module.backend.cloudwatch_log_group_arn
 }

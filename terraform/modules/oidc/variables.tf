@@ -98,6 +98,13 @@ variable "ecs_task_role_arn" {
   nullable    = true
 }
 
+variable "cloudwatch_log_group_arn" {
+  description = "Backend CloudWatch log group ARN. Required when deployment_type is backend."
+  type        = string
+  default     = null
+  nullable    = true
+}
+
 variable "tags" {
   description = "Additional IAM resource tags."
   type        = map(string)

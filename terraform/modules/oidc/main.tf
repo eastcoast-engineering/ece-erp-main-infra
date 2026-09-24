@@ -52,6 +52,7 @@ locals {
   ecs_task_definition_arn     = var.ecs_task_definition_arn_pattern != null ? var.ecs_task_definition_arn_pattern : "*"
   ecs_task_execution_role_arn = var.ecs_task_execution_role_arn != null ? var.ecs_task_execution_role_arn : "*"
   ecs_task_role_arn           = var.ecs_task_role_arn != null ? var.ecs_task_role_arn : "*"
+  cloudwatch_log_group_arn    = var.cloudwatch_log_group_arn != null ? var.cloudwatch_log_group_arn : "*"
 
   common_tags = merge(
     {
@@ -215,6 +216,14 @@ data "aws_iam_policy_document" "backend_deployment" {
     effect    = "Allow"
     actions   = ["ecs:DescribeTasks"]
     resources = ["*"]
+  }
+
+  statement {
+    sid     = "ReadBackendTaskLogs"
+    effect  = "Allow"
+    actions = ["logs:GetLogEvents"]
+
+    resources = ["${local.cloudwatch_log_group_arn}:log-stream:*"]
   }
 
   statement {
