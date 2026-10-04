@@ -22,6 +22,12 @@ variable "sub_domain" {
   default     = "dev"
 }
 
+variable "mailpit_recipient_domain" {
+  description = "Shared test-mail domain verified as an SES recipient identity."
+  type        = string
+  default     = "mailpit.workwife.app"
+}
+
 variable "frontend_github_repo" {
   description = "GitHub repository for the frontend website."
   type        = string

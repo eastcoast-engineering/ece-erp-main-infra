@@ -71,3 +71,10 @@ output "database_credentials" {
 
   sensitive = true
 }
+output "mailpit_ses_verification_token" {
+  value = module.mailpit_ses_identity.verification_token
+}
+
+output "mailpit_ses_dkim_tokens" {
+  value = module.mailpit_ses_identity.dkim_tokens
+}

@@ -46,6 +46,8 @@ Terraform creates:
   same public-access block and presigned-upload CORS controls;
 - least-privilege ECS task/execution policies for S3, SES, and secrets;
 - separate GitHub OIDC roles for frontend and backend deployments.
+- a production-account Mailpit test mailbox on the smallest ARM EC2 instance,
+  with Route 53 MX/A records and an authenticated HTTPS UI.
 
 CloudWatch task logging is controlled by `enable_cloudwatch_logs` and defaults
 to `false` while the product is in active development. Set it to `true` on the
@@ -95,6 +97,49 @@ baked into the container image.
 SES uses `dev.workwife.app` in development and `workwife.app` in production.
 The current verified sender mailbox is `mryoungtommy@gmail.com`; mailbox
 verification is separate in each AWS account.
+
+## Shared test mailbox
+
+All automated and manual test email addresses should use
+`<anything>@mailpit.workwife.app`. Route 53 publishes an MX record for that
+subdomain, and the production-account Mailpit instance captures every matching
+recipient without relaying messages onward. Open the shared inbox at
+`https://mailpit.workwife.app` and sign in through the browser login page. The
+generated administrator username is `workwife`; engineers use their configured
+email address.
+
+Mailpit UI accounts are declared in the gitignored
+`terraform/environments/prod/prod.secrets.auto.tfvars` file as the sensitive
+`mailpit_ui_accounts` map. Terraform combines those engineer accounts with the
+generated `workwife` administrator and stores only the resulting JSON in the
+standard-tier SSM SecureString `/workwife/prod/mailpit/ui_accounts`. The host
+refreshes its authentication file every 30 minutes. Add or remove an engineer
+in that map and apply the production Terraform; never place a real password in
+the tracked example file.
+
+Retrieve the generated `workwife` password only when needed:
+
+```bash
+aws-vault exec ece-prod -- aws ssm get-parameter \
+  --name /workwife/prod/mailpit/ui_accounts \
+  --with-decryption \
+  --query Parameter.Value \
+  --output text | jq -r '.workwife'
+```
+
+Mailpit runs on an on-demand `t4g.nano` with an encrypted 8 GiB root volume.
+There is no load balancer, NAT gateway, SSH ingress, or CloudWatch log
+ingestion. Caddy terminates HTTPS automatically, SSM Session Manager is the
+only administrative entry point, and Mailpit accepts SMTP only for
+`@mailpit.workwife.app`. Captured messages are testing data, capped at 5,000
+messages and retained for at most 30 days; they are not a production archive.
+
+The same domain is verified as an SES identity in both the development and
+production AWS accounts. This allows either sandboxed SES account to deliver
+test messages to any `<anything>@mailpit.workwife.app` recipient. Terraform
+publishes both accounts' verification and DKIM records in the production Route
+53 zone. The MX record still points directly to Mailpit and must not be replaced
+with an SES inbound receipt endpoint.
 
 ## Prerequisites
 

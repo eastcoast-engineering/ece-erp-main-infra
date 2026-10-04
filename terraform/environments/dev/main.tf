@@ -106,6 +106,12 @@ module "backend_secrets" {
   parameter_values = var.backend_parameter_store_secrets
 }
 
+module "mailpit_ses_identity" {
+  source = "../../modules/ses_recipient_identity"
+
+  domain = var.mailpit_recipient_domain
+}
+
 
 module "backend" {
   source = "../../modules/backend_deployment"

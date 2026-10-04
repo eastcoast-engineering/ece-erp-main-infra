@@ -4,6 +4,10 @@ locals {
     replace(lower(var.environment), "/[^a-z0-9-]+/", "-"),
     "-"
   )
+  namespace_slug = trim(
+    replace(lower(var.namespace), "/[^a-z0-9-]+/", "-"),
+    "-"
+  )
 
   parameter_names = nonsensitive(toset(keys(var.parameter_values)))
   common_tags = merge(
@@ -11,7 +15,7 @@ locals {
       Project     = var.project_name
       Environment = var.environment
       ManagedBy   = "Terraform"
-      Component   = "BackendSecrets"
+      Component   = "${title(local.namespace_slug)}Secrets"
     },
     var.tags
   )
@@ -20,7 +24,7 @@ locals {
 resource "aws_ssm_parameter" "backend" {
   for_each = local.parameter_names
 
-  name = "/${local.project_slug}/${local.environment_slug}/backend/${lower(each.key)}"
+  name = "/${local.project_slug}/${local.environment_slug}/${local.namespace_slug}/${lower(each.key)}"
   type = "SecureString"
   tier = "Standard"
   value = sensitive(

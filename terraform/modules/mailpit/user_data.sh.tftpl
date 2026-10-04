@@ -1,0 +1,192 @@
+#!/bin/bash
+set -euo pipefail
+
+exec > >(tee -a /var/log/mailpit-bootstrap.log) 2>&1
+
+# Package metadata processing can briefly exceed a t4g.nano's 512 MiB RAM.
+# Use space from the existing root volume instead of increasing instance cost.
+if ! swapon --show=NAME --noheadings | grep -qx '/swapfile'; then
+  fallocate -l 1G /swapfile
+  chmod 0600 /swapfile
+  mkswap /swapfile
+  swapon /swapfile
+  grep -q '^/swapfile ' /etc/fstab || printf '%s\n' '/swapfile none swap sw 0 0' >> /etc/fstab
+fi
+
+for binary in aws curl jq tar; do
+  if ! command -v "$binary" >/dev/null 2>&1; then
+    echo "Required Amazon Linux binary is missing: $binary" >&2
+    exit 1
+  fi
+done
+
+id mailpit >/dev/null 2>&1 || useradd --system --home-dir /var/lib/mailpit --shell /sbin/nologin mailpit
+id caddy >/dev/null 2>&1 || useradd --system --home-dir /var/lib/caddy --shell /sbin/nologin caddy
+
+install -d -m 0750 -o mailpit -g mailpit /var/lib/mailpit
+install -d -m 0750 -o root -g mailpit /etc/mailpit
+install -d -m 0755 -o root -g root /etc/caddy
+install -d -m 0750 -o caddy -g caddy /var/lib/caddy /var/lib/caddy/config
+
+curl -fsSL "https://github.com/axllent/mailpit/releases/download/${mailpit_version}/mailpit-linux-arm64.tar.gz" -o /tmp/mailpit.tar.gz
+echo "${mailpit_archive_sha256}  /tmp/mailpit.tar.gz" | sha256sum --check --status
+tar -xzf /tmp/mailpit.tar.gz -C /usr/local/bin mailpit
+chmod 0755 /usr/local/bin/mailpit
+
+curl -fsSL "https://github.com/caddyserver/caddy/releases/download/v${caddy_version}/caddy_${caddy_version}_linux_arm64.tar.gz" -o /tmp/caddy.tar.gz
+echo "${caddy_archive_sha256}  /tmp/caddy.tar.gz" | sha256sum --check --status
+tar -xzf /tmp/caddy.tar.gz -C /usr/local/bin caddy
+chmod 0755 /usr/local/bin/caddy
+
+cat > /usr/local/sbin/sync-mailpit-auth <<'AUTH_SYNC'
+${auth_sync_script}
+AUTH_SYNC
+chmod 0750 /usr/local/sbin/sync-mailpit-auth
+
+auth_synced=false
+for attempt in $(seq 1 60); do
+  if /usr/local/sbin/sync-mailpit-auth; then
+    auth_synced=true
+    break
+  fi
+  sleep 5
+done
+if [ "$auth_synced" != "true" ]; then
+  echo "Mailpit UI accounts were not available from SSM" >&2
+  exit 1
+fi
+
+cat > /usr/local/libexec/mailpit-auth-server <<'AUTH_SERVER'
+${auth_server}
+AUTH_SERVER
+chmod 0755 /usr/local/libexec/mailpit-auth-server
+
+python3 - <<'PY'
+import secrets
+from pathlib import Path
+
+Path("/etc/mailpit/session-secret").write_text(secrets.token_hex(32), encoding="utf-8")
+PY
+chown mailpit:mailpit /etc/mailpit/session-secret
+chmod 0400 /etc/mailpit/session-secret
+
+cat > /etc/systemd/system/mailpit-auth.service <<'UNIT'
+[Unit]
+Description=Workwife Mailpit form authentication
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=mailpit
+Group=mailpit
+Environment=MAILPIT_AUTH_FILE=/etc/mailpit/ui-auth
+Environment=MAILPIT_SESSION_SECRET_FILE=/etc/mailpit/session-secret
+Environment=MAILPIT_AUTH_BIND=127.0.0.1:4180
+ExecStart=/usr/local/libexec/mailpit-auth-server
+Restart=always
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+
+cat > /etc/systemd/system/mailpit.service <<'UNIT'
+[Unit]
+Description=Workwife Mailpit test mailbox
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=mailpit
+Group=mailpit
+Environment=MP_DATABASE=/var/lib/mailpit/mailpit.db
+Environment=MP_UI_BIND_ADDR=127.0.0.1:8025
+Environment=MP_SMTP_BIND_ADDR=0.0.0.0:25
+Environment=MP_ALLOWED_HOSTS=${domain_name}
+Environment="MP_SMTP_ALLOWED_RECIPIENTS=${smtp_allowed_recipients}"
+Environment=MP_MAX_MESSAGES=${max_messages}
+Environment=MP_MAX_AGE=${max_age}
+Environment=MP_MAX_MESSAGE_SIZE=25
+Environment="MP_LABEL=Workwife Test Mail"
+Environment=MP_BLOCK_REMOTE_CSS_AND_FONTS=true
+Environment=MP_DISABLE_VERSION_CHECK=true
+ExecStart=/usr/local/bin/mailpit
+Restart=always
+RestartSec=5
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/mailpit
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+
+cat > /etc/caddy/Caddyfile <<'CADDY'
+${domain_name} {
+  encode zstd gzip
+
+  header {
+    X-Content-Type-Options nosniff
+    X-Frame-Options DENY
+    Referrer-Policy no-referrer
+  }
+
+  handle /login {
+    reverse_proxy 127.0.0.1:4180
+  }
+
+  handle /logout {
+    reverse_proxy 127.0.0.1:4180
+  }
+
+  handle {
+    forward_auth 127.0.0.1:4180 {
+      uri /auth
+    }
+    reverse_proxy 127.0.0.1:8025
+  }
+}
+CADDY
+
+cat > /etc/systemd/system/caddy.service <<'UNIT'
+[Unit]
+Description=Caddy HTTPS proxy for Workwife Mailpit
+After=network-online.target mailpit.service mailpit-auth.service
+Wants=network-online.target
+
+[Service]
+Type=notify
+User=caddy
+Group=caddy
+Environment=XDG_DATA_HOME=/var/lib/caddy
+Environment=XDG_CONFIG_HOME=/var/lib/caddy/config
+ExecStart=/usr/local/bin/caddy run --environ --config /etc/caddy/Caddyfile
+ExecReload=/usr/local/bin/caddy reload --config /etc/caddy/Caddyfile --force
+TimeoutStopSec=5s
+LimitNOFILE=1048576
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+CapabilityBoundingSet=CAP_NET_BIND_SERVICE
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/caddy
+
+[Install]
+WantedBy=multi-user.target
+UNIT
+
+systemctl daemon-reload
+systemctl enable --now mailpit.service mailpit-auth.service caddy.service
+
+rm -f /tmp/mailpit.tar.gz /tmp/caddy.tar.gz
