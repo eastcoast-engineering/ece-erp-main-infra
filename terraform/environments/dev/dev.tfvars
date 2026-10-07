@@ -4,6 +4,12 @@ sub_domain  = "dev"
 
 email_domain = "mailpit.workwife.app"
 
+ses_test_recipient_emails = [
+  "mryoungtommy@gmail.com",
+  "tom.kidumbuyo@gmail.com",
+  "angeladolberth@gmail.com",
+]
+
 frontend_github_repo             = "eastcoast-engineering/ece-erp-main-frontend"
 frontend_github_branch           = "dev"
 frontend_github_subject_override = "repo:eastcoast-engineering@247177585/ece-erp-main-frontend@1157935426:ref:refs/heads/dev"

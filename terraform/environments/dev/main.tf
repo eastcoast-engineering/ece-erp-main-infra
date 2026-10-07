@@ -109,7 +109,8 @@ module "backend_secrets" {
 module "mailpit_ses_identity" {
   source = "../../modules/ses_recipient_identity"
 
-  domain = var.mailpit_recipient_domain
+  domain          = var.mailpit_recipient_domain
+  email_addresses = var.ses_test_recipient_emails
 }
 
 

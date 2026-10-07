@@ -34,6 +34,12 @@ variable "mailpit_recipient_domain" {
   default     = "mailpit.workwife.app"
 }
 
+variable "ses_test_recipient_emails" {
+  description = "Individual test recipients to verify while this account remains in the SES sandbox."
+  type        = set(string)
+  default     = []
+}
+
 variable "frontend_github_repo" {
   description = "GitHub repository for the frontend website."
   type        = string
