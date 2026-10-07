@@ -102,8 +102,11 @@ in each AWS account; a verified recipient does not authorize an unrelated sender
 
 Individual sandbox testing recipients are declared in each environment's
 `ses_test_recipient_emails` set. The shared recipient-identity module creates
-their SES email identities without adding them to the backend's sender IAM
-permissions. Each mailbox owner must click the AWS verification link for each
+their SES email identities. In development, the backend task policy includes
+these verified recipient identity ARNs because SES v2 evaluates them during
+`SendEmail`. That statement requires `ses:FromAddress` to equal the configured
+`AWS_SES_FROM_EMAIL`; it does not allow the task to send *from* a test mailbox.
+Each mailbox owner must click the AWS verification link for each
 account/region before SES can deliver registration or recovery messages there.
 Terraform creation means verification **requested**, not verified. Keep automated
 test users on Mailpit; these personal addresses are optional manual testers.
