@@ -219,6 +219,13 @@ data "aws_iam_policy_document" "backend_deployment" {
   }
 
   statement {
+    sid       = "StopAbandonedBackendTasks"
+    effect    = "Allow"
+    actions   = ["ecs:StopTask"]
+    resources = ["${replace(local.ecs_cluster_arn, ":cluster/", ":task/")}/*"]
+  }
+
+  statement {
     sid     = "ReadBackendTaskLogs"
     effect  = "Allow"
     actions = ["logs:GetLogEvents"]
