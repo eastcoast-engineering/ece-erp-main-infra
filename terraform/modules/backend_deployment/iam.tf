@@ -118,6 +118,24 @@ data "aws_iam_policy_document" "backend_email" {
       aws_ses_email_identity.sender.arn,
     ], var.ses_additional_sender_identity_arns)
   }
+
+  dynamic "statement" {
+    for_each = length(var.ses_sandbox_recipient_identity_arns) > 0 ? [1] : []
+    content {
+      sid       = "SendToVerifiedSandboxRecipients"
+      effect    = "Allow"
+      actions   = ["ses:SendEmail", "ses:SendRawEmail"]
+      resources = var.ses_sandbox_recipient_identity_arns
+
+      # SES v2 evaluates a verified recipient email identity as a resource.
+      # These ARNs must not authorize sending *from* a test recipient.
+      condition {
+        test     = "StringEquals"
+        variable = "ses:FromAddress"
+        values   = [var.ses_from_email]
+      }
+    }
+  }
 }
 
 resource "aws_iam_role_policy" "backend_email" {

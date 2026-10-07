@@ -28,6 +28,12 @@ variable "mailpit_domain" {
   default     = "mailpit.workwife.app"
 }
 
+variable "ses_test_recipient_emails" {
+  description = "Individual test recipients to verify while this account remains in the SES sandbox."
+  type        = set(string)
+  default     = []
+}
+
 variable "mailpit_instance_type" {
   description = "Low-cost ARM64 EC2 size used by Mailpit."
   type        = string

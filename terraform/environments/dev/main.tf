@@ -109,7 +109,8 @@ module "backend_secrets" {
 module "mailpit_ses_identity" {
   source = "../../modules/ses_recipient_identity"
 
-  domain = var.mailpit_recipient_domain
+  domain          = var.mailpit_recipient_domain
+  email_addresses = var.ses_test_recipient_emails
 }
 
 
@@ -127,6 +128,7 @@ module "backend" {
   ses_hosted_zone_id                  = module.workwife_dns.zone_id
   ses_from_email                      = "noreply@${var.email_domain}"
   ses_additional_sender_identity_arns = [module.mailpit_ses_identity.arn]
+  ses_sandbox_recipient_identity_arns = module.mailpit_ses_identity.email_identity_arns
 
   vpc_id                          = module.backend_network.vpc_id
   public_subnet_ids               = module.backend_network.public_subnet_ids
