@@ -7,6 +7,8 @@ mailpit_admin_username = "workwife"
 mailpit_max_messages   = 5000
 mailpit_max_age        = "30d"
 
+email_domain = "workwife.app"
+
 frontend_github_repo             = "eastcoast-engineering/ece-erp-main-frontend"
 frontend_github_branch           = "main"
 frontend_github_subject_override = "repo:eastcoast-engineering@247177585/ece-erp-main-frontend@1157935426:ref:refs/heads/main"

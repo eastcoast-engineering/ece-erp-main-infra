@@ -109,7 +109,6 @@ module "mailpit" {
 
 module "mailpit_ses_identity" {
   source = "../../modules/ses_recipient_identity"
-
   domain = var.mailpit_domain
 }
 
@@ -188,7 +187,7 @@ resource "aws_route53_record" "mailpit_ses_dkim" {
 #   api_public            = var.api_public
 #   ses_sender_domain     = var.root_domain
 #   ses_hosted_zone_id    = module.workwife_dns.zone_id
-#   ses_from_email        = "mryoungtommy@gmail.com"
+#   ses_from_email        = "noreply@${var.email_domain}"
 
 #   vpc_id                          = module.backend_network.vpc_id
 #   public_subnet_ids               = module.backend_network.public_subnet_ids

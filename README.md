@@ -10,10 +10,12 @@ Actions owns application image/file deployment.
 | Production | `905611588718` | `https://workwife.app` | `https://api.workwife.app` | `ece-prod` |
 | Local | none | `http://localhost:4200` | `http://127.0.0.1:8080` | none |
 
-The organisation accounts were originally created by the sibling
-`infra-core` repository. The older `infra-organisation` repository is useful
-for DNS history, but this repository is now the application-infrastructure
-source of truth.
+The organisation-account Terraform is now included under
+`terraform/environments/organisation` and
+`terraform/modules/organisation_bootstrap`. It was recovered from the sibling
+`infra-core` checkout (remote repository `ece-core-infra`). The original source
+and state remain intact. This repository owns both account-bootstrap source and
+application infrastructure.
 
 ## Architecture
 
@@ -49,11 +51,9 @@ Terraform creates:
 - a production-account Mailpit test mailbox on the smallest ARM EC2 instance,
   with Route 53 MX/A records and an authenticated HTTPS UI.
 
-CloudWatch task logging is controlled by `enable_cloudwatch_logs` and defaults
-to `false` while the product is in active development. Set it to `true` on the
-backend module when centralized task logs are worth the ingestion and storage
-cost. While disabled, ECS task definitions do not send logs to CloudWatch and
-the existing log group is retained with one-day retention for safe rollback.
+CloudWatch task logging defaults to disabled, but development explicitly enables
+it with one-day retention so migration, E2E, and service failures are diagnosable.
+Container Insights remains disabled. The normal API service runs one task.
 
 RDS owns the database master password with
 `manage_master_user_password = true`. The credential JSON is stored in the
@@ -161,6 +161,35 @@ is expired, complete the device authorization shown by `aws-vault` and rerun
 the identity command.
 
 ## Terraform workflow
+
+### AWS organisation recovery
+
+The management-account stack uses account `058755926944`, profile `ece-root`,
+and the original state at
+`s3://ece-tfstate-058755926944/infra-core/dev/terraform.tfstate`. Resource module
+names are preserved, so moving source does not recreate accounts or SSO users.
+The recovered configuration was checked against that state and produced a
+no-change plan. The actual `organisation.tfvars` is gitignored to avoid
+publishing engineer identities in this public infrastructure repository.
+
+```bash
+aws-vault exec ece-root -- terraform -chdir=terraform/environments/organisation init
+aws-vault exec ece-root -- terraform -chdir=terraform/environments/organisation plan -var-file=organisation.tfvars
+```
+
+For recovery on another machine, restore the variable file from the private
+`ece-core-infra` source or management state, then review the plan. Keep the state
+key unchanged; do not run the old and new checkouts concurrently. AWS accounts
+have `prevent_destroy`. Setting `create_organization=true` supports an empty
+management account without first evaluating an absent-organisation data source.
+
+Initial management-account access, the remote-state buckets, and enabling the
+organization instance of IAM Identity Center are bootstrap prerequisites.
+AWS documents enabling that organization instance through the management
+console: https://docs.aws.amazon.com/singlesignon/latest/userguide/identity-center-and-orgs.html
+After that, Terraform provisions OUs/accounts, SSO users/groups/permission sets,
+and the separate dev/prod application stacks. No organisational changes were
+applied while recovering this source.
 
 State is separated by account:
 

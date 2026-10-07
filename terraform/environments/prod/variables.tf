@@ -10,6 +10,12 @@ variable "environment" {
   default     = "prod"
 }
 
+variable "email_domain" {
+  description = "Root email domain."
+  type        = string
+  default     = "workwife.app"
+}
+
 variable "root_domain" {
   description = "Root production domain."
   type        = string

@@ -54,7 +54,7 @@ module "frontend_oidc" {
 module "backend_network" {
   source = "../../modules/backend_network"
 
-  project_name   = "quotashark"
+  project_name   = "workwife"
   environment    = var.environment
   vpc_cidr       = var.backend_vpc_cidr
   container_port = var.backend_container_port
@@ -70,7 +70,7 @@ module "backend_network" {
 module "database" {
   source = "../../modules/database"
 
-  project_name = "quotashark"
+  project_name = "workwife"
   environment  = var.environment
 
   public_subnet_ids   = module.backend_network.public_subnet_ids
@@ -116,16 +116,17 @@ module "mailpit_ses_identity" {
 module "backend" {
   source = "../../modules/backend_deployment"
 
-  project_name = "quotashark"
+  project_name = "workwife"
   environment  = var.environment
   aws_region   = var.aws_region
 
-  domain_name           = local.backend_api_domain
-  public_hosted_zone_id = module.workwife_dns.zone_id
-  api_public            = var.api_public
-  ses_sender_domain     = local.frontend_domain
-  ses_hosted_zone_id    = module.workwife_dns.zone_id
-  ses_from_email        = "mryoungtommy@gmail.com"
+  domain_name                         = local.backend_api_domain
+  public_hosted_zone_id               = module.workwife_dns.zone_id
+  api_public                          = var.api_public
+  ses_sender_domain                   = local.frontend_domain
+  ses_hosted_zone_id                  = module.workwife_dns.zone_id
+  ses_from_email                      = "noreply@${var.email_domain}"
+  ses_additional_sender_identity_arns = [module.mailpit_ses_identity.arn]
 
   vpc_id                          = module.backend_network.vpc_id
   public_subnet_ids               = module.backend_network.public_subnet_ids
@@ -152,7 +153,8 @@ module "backend" {
   container_environment       = var.backend_container_environment
   container_secret_parameters = module.backend_secrets.parameter_arns
   ecr_force_delete            = true
-  enable_cloudwatch_logs      = false
+  enable_cloudwatch_logs      = true
+  log_retention_days          = 1
   enable_container_insights   = false
 }
 
