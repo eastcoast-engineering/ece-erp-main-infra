@@ -94,9 +94,11 @@ remote state, so state access must remain restricted. The Firebase JSON is
 passed through `GOOGLE_APPLICATION_CREDENTIALS_JSON`; no credential file is
 baked into the container image.
 
-SES uses `dev.workwife.app` in development and `workwife.app` in production.
-The current verified sender mailbox is `mryoungtommy@gmail.com`; mailbox
-verification is separate in each AWS account.
+SES retains the environment identities `dev.workwife.app` and `workwife.app`.
+The current testing sender in both environments is
+`noreply@mailpit.workwife.app`, covered by the separately verified Mailpit domain
+identity. Domain verification and send permissions are configured independently
+in each AWS account; a verified recipient does not authorize an unrelated sender.
 
 ## Shared test mailbox
 
