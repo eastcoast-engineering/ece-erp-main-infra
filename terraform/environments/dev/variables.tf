@@ -16,10 +16,22 @@ variable "root_domain" {
   default     = "workwife.app"
 }
 
+variable "email_domain" {
+  description = "Root email domain."
+  type        = string
+  default     = "mailpit.workwife.app"
+}
+
 variable "sub_domain" {
   description = "Delegated development subdomain."
   type        = string
   default     = "dev"
+}
+
+variable "mailpit_recipient_domain" {
+  description = "Shared test-mail domain verified as an SES recipient identity."
+  type        = string
+  default     = "mailpit.workwife.app"
 }
 
 variable "frontend_github_repo" {

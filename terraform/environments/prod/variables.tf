@@ -10,10 +10,82 @@ variable "environment" {
   default     = "prod"
 }
 
+variable "email_domain" {
+  description = "Root email domain."
+  type        = string
+  default     = "workwife.app"
+}
+
 variable "root_domain" {
   description = "Root production domain."
   type        = string
   default     = "workwife.app"
+}
+
+variable "mailpit_domain" {
+  description = "Public web and inbound-email hostname for the shared test mailbox."
+  type        = string
+  default     = "mailpit.workwife.app"
+}
+
+variable "mailpit_instance_type" {
+  description = "Low-cost ARM64 EC2 size used by Mailpit."
+  type        = string
+  default     = "t4g.nano"
+}
+
+variable "mailpit_admin_username" {
+  description = "Generated administrator username for the Mailpit web UI."
+  type        = string
+  default     = "workwife"
+}
+
+variable "mailpit_ui_accounts" {
+  description = "Additional form-login accounts for the shared Mailpit web UI. Define only in prod.secrets.auto.tfvars."
+  type        = map(string)
+  sensitive   = true
+  default     = {}
+
+  validation {
+    condition = alltrue([
+      for username, password in var.mailpit_ui_accounts :
+      trimspace(username) != "" &&
+      !strcontains(username, ":") &&
+      !strcontains(username, "\n") &&
+      password != "" &&
+      !strcontains(password, "\n")
+    ])
+    error_message = "Mailpit usernames must be non-empty and cannot contain colons/newlines; passwords must be non-empty and cannot contain newlines."
+  }
+}
+
+variable "mailpit_max_messages" {
+  description = "Maximum number of captured test messages retained."
+  type        = number
+  default     = 5000
+}
+
+variable "mailpit_max_age" {
+  description = "Maximum age of captured test messages."
+  type        = string
+  default     = "30d"
+}
+
+variable "mailpit_dev_ses_verification_tokens" {
+  description = "Non-secret SES domain-verification tokens issued by the development AWS account."
+  type        = list(string)
+  default     = []
+}
+
+variable "mailpit_dev_ses_dkim_tokens" {
+  description = "Non-secret Easy DKIM tokens issued by the development AWS account."
+  type        = list(string)
+  default     = []
+
+  validation {
+    condition     = length(var.mailpit_dev_ses_dkim_tokens) == 0 || length(var.mailpit_dev_ses_dkim_tokens) == 3
+    error_message = "mailpit_dev_ses_dkim_tokens must be empty during bootstrap or contain the three SES DKIM tokens."
+  }
 }
 
 variable "frontend_github_repo" {

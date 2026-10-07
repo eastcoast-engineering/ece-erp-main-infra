@@ -63,3 +63,31 @@ output "backend_parameter_arns" {
 output "root_zone_name_servers" {
   value = module.workwife_dns.name_servers
 }
+
+output "mailpit_web_url" {
+  value = module.mailpit.web_url
+}
+
+output "mailpit_smtp_hostname" {
+  value = module.mailpit.smtp_hostname
+}
+
+output "mailpit_instance_id" {
+  value = module.mailpit.instance_id
+}
+
+output "mailpit_admin_username" {
+  value = var.mailpit_admin_username
+}
+
+output "mailpit_ui_accounts_parameter_name" {
+  value = module.mailpit_secrets.parameter_names["UI_ACCOUNTS"]
+}
+
+output "mailpit_prod_ses_verification_token" {
+  value = module.mailpit_ses_identity.verification_token
+}
+
+output "mailpit_prod_ses_dkim_tokens" {
+  value = module.mailpit_ses_identity.dkim_tokens
+}

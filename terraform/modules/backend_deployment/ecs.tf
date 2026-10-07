@@ -34,6 +34,7 @@ resource "aws_ecs_task_definition" "api" {
     merge({
       name      = local.container_name
       image     = "${aws_ecr_repository.api.repository_url}:bootstrap"
+      command   = ["/usr/local/bin/workwife-api"]
       essential = true
 
       portMappings = [

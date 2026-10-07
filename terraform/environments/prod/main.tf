@@ -1,5 +1,15 @@
 locals {
   backend_api_domain = "api.${var.root_domain}"
+  mailpit_ses_dkim_tokens = merge(
+    {
+      for index in range(3) :
+      "prod-${index}" => module.mailpit_ses_identity.dkim_tokens[index]
+    },
+    {
+      for index, token in var.mailpit_dev_ses_dkim_tokens :
+      "dev-${index}" => token
+    },
+  )
 }
 
 module "workwife_dns" {
@@ -53,6 +63,74 @@ module "backend_secrets" {
   project_name     = "workwife"
   environment      = var.environment
   parameter_values = var.backend_parameter_store_secrets
+}
+
+resource "random_password" "mailpit_admin" {
+  length  = 32
+  special = false
+}
+
+module "mailpit_secrets" {
+  source = "../../modules/secret_management"
+
+  project_name = "workwife"
+  environment  = var.environment
+  namespace    = "mailpit"
+
+  parameter_values = {
+    UI_ACCOUNTS = jsonencode(merge(
+      { (var.mailpit_admin_username) = random_password.mailpit_admin.result },
+      var.mailpit_ui_accounts,
+    ))
+  }
+}
+
+module "mailpit" {
+  source = "../../modules/mailpit"
+
+  project_name = "workwife"
+  environment  = var.environment
+  aws_region   = var.aws_region
+
+  domain_name    = var.mailpit_domain
+  hosted_zone_id = module.workwife_dns.zone_id
+  instance_type  = var.mailpit_instance_type
+
+  ui_accounts_parameter_arn = (
+    module.mailpit_secrets.parameter_arns["UI_ACCOUNTS"]
+  )
+  ui_accounts_parameter_name = (
+    module.mailpit_secrets.parameter_names["UI_ACCOUNTS"]
+  )
+
+  max_messages = var.mailpit_max_messages
+  max_age      = var.mailpit_max_age
+}
+
+module "mailpit_ses_identity" {
+  source = "../../modules/ses_recipient_identity"
+  domain = var.mailpit_domain
+}
+
+resource "aws_route53_record" "mailpit_ses_verification" {
+  zone_id = module.workwife_dns.zone_id
+  name    = "_amazonses.${var.mailpit_domain}"
+  type    = "TXT"
+  ttl     = 300
+  records = concat(
+    [module.mailpit_ses_identity.verification_token],
+    var.mailpit_dev_ses_verification_tokens,
+  )
+}
+
+resource "aws_route53_record" "mailpit_ses_dkim" {
+  for_each = local.mailpit_ses_dkim_tokens
+
+  zone_id = module.workwife_dns.zone_id
+  name    = "${each.value}._domainkey.${var.mailpit_domain}"
+  type    = "CNAME"
+  ttl     = 300
+  records = ["${each.value}.dkim.amazonses.com"]
 }
 
 # module "backend_network" {
@@ -109,7 +187,7 @@ module "backend_secrets" {
 #   api_public            = var.api_public
 #   ses_sender_domain     = var.root_domain
 #   ses_hosted_zone_id    = module.workwife_dns.zone_id
-#   ses_from_email        = "mryoungtommy@gmail.com"
+#   ses_from_email        = "noreply@${var.email_domain}"
 
 #   vpc_id                          = module.backend_network.vpc_id
 #   public_subnet_ids               = module.backend_network.public_subnet_ids

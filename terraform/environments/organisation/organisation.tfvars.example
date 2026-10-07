@@ -1,0 +1,16 @@
+# Copy to organisation.tfvars and restore the account/user configuration from
+# the private ece-core-infra repository or the existing management-account state.
+# Existing AWS accounts must be imported/recovered, never recreated blindly.
+organizations = [{
+  ou_name = "eastcoast-engineering-ou"
+  accounts = [
+    { name = "dev", email = "dev_account@eastcoast.engineering" },
+    { name = "prod", email = "prod_account@eastcoast.engineering" },
+  ]
+}]
+admin_user_ids = {}
+groups = [
+  { name = "Admininstrator", policy_arns = ["arn:aws:iam::aws:policy/AdministratorAccess"] },
+  { name = "PowerUser", policy_arns = ["arn:aws:iam::aws:policy/PowerUserAccess"] },
+]
+users = {}

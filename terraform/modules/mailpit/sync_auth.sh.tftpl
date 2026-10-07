@@ -1,0 +1,27 @@
+#!/bin/bash
+set -euo pipefail
+
+accounts_json="$(aws ssm get-parameter \
+  --region "${aws_region}" \
+  --name "${ui_accounts_parameter_name}" \
+  --with-decryption \
+  --query 'Parameter.Value' \
+  --output text)"
+
+auth_file="$(mktemp)"
+trap 'rm -f "$auth_file"' EXIT
+
+printf '%s' "$accounts_json" | jq -e -r '
+  if type != "object" or length == 0 then
+    error("Mailpit UI accounts must be a non-empty object")
+  else
+    to_entries[] | "\(.key):\(.value)"
+  end
+' > "$auth_file"
+unset accounts_json
+
+if [ -f /etc/mailpit/ui-auth ] && cmp -s "$auth_file" /etc/mailpit/ui-auth; then
+  exit 0
+fi
+
+install -m 0640 -o root -g mailpit "$auth_file" /etc/mailpit/ui-auth

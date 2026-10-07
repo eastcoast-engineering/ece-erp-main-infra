@@ -206,6 +206,12 @@ variable "enable_cloudwatch_logs" {
   default     = false
 }
 
+variable "ses_additional_sender_identity_arns" {
+  description = "Additional verified SES sender domains, for shared Mailpit test senders."
+  type        = list(string)
+  default     = []
+}
+
 variable "ecr_force_delete" {
   description = "Whether Terraform may delete a non-empty ECR repository."
   type        = bool

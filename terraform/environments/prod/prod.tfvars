@@ -1,6 +1,14 @@
 environment = "prod"
 root_domain = "workwife.app"
 
+mailpit_domain         = "mailpit.workwife.app"
+mailpit_instance_type  = "t4g.nano"
+mailpit_admin_username = "workwife"
+mailpit_max_messages   = 5000
+mailpit_max_age        = "30d"
+
+email_domain = "workwife.app"
+
 frontend_github_repo             = "eastcoast-engineering/ece-erp-main-frontend"
 frontend_github_branch           = "main"
 frontend_github_subject_override = "repo:eastcoast-engineering@247177585/ece-erp-main-frontend@1157935426:ref:refs/heads/main"
@@ -80,4 +88,16 @@ delegations = [
       "ns-1760.awsdns-28.co.uk",
     ]
   }
+]
+
+# SES domain-identity tokens created in the dev account. The prod account owns
+# workwife.app DNS, so it publishes both accounts' verification records.
+mailpit_dev_ses_verification_tokens = [
+  "mrnZnn7h4j39cr4WcyqSz9kFCj2Iy4/j1TqPrHTG7ys=",
+]
+
+mailpit_dev_ses_dkim_tokens = [
+  "gg4p3b22ogmivl6sk37y4emc3wty553l",
+  "rtm3sn2lm4mnld742f4mf57cs3trftt6",
+  "qqvmbjdguczwn5ulpem4rumhekgonv3l",
 ]

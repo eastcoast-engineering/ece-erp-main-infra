@@ -10,10 +10,12 @@ Actions owns application image/file deployment.
 | Production | `905611588718` | `https://workwife.app` | `https://api.workwife.app` | `ece-prod` |
 | Local | none | `http://localhost:4200` | `http://127.0.0.1:8080` | none |
 
-The organisation accounts were originally created by the sibling
-`infra-core` repository. The older `infra-organisation` repository is useful
-for DNS history, but this repository is now the application-infrastructure
-source of truth.
+The organisation-account Terraform is now included under
+`terraform/environments/organisation` and
+`terraform/modules/organisation_bootstrap`. It was recovered from the sibling
+`infra-core` checkout (remote repository `ece-core-infra`). The original source
+and state remain intact. This repository owns both account-bootstrap source and
+application infrastructure.
 
 ## Architecture
 
@@ -46,12 +48,12 @@ Terraform creates:
   same public-access block and presigned-upload CORS controls;
 - least-privilege ECS task/execution policies for S3, SES, and secrets;
 - separate GitHub OIDC roles for frontend and backend deployments.
+- a production-account Mailpit test mailbox on the smallest ARM EC2 instance,
+  with Route 53 MX/A records and an authenticated HTTPS UI.
 
-CloudWatch task logging is controlled by `enable_cloudwatch_logs` and defaults
-to `false` while the product is in active development. Set it to `true` on the
-backend module when centralized task logs are worth the ingestion and storage
-cost. While disabled, ECS task definitions do not send logs to CloudWatch and
-the existing log group is retained with one-day retention for safe rollback.
+CloudWatch task logging defaults to disabled, but development explicitly enables
+it with one-day retention so migration, E2E, and service failures are diagnosable.
+Container Insights remains disabled. The normal API service runs one task.
 
 RDS owns the database master password with
 `manage_master_user_password = true`. The credential JSON is stored in the
@@ -96,6 +98,49 @@ SES uses `dev.workwife.app` in development and `workwife.app` in production.
 The current verified sender mailbox is `mryoungtommy@gmail.com`; mailbox
 verification is separate in each AWS account.
 
+## Shared test mailbox
+
+All automated and manual test email addresses should use
+`<anything>@mailpit.workwife.app`. Route 53 publishes an MX record for that
+subdomain, and the production-account Mailpit instance captures every matching
+recipient without relaying messages onward. Open the shared inbox at
+`https://mailpit.workwife.app` and sign in through the browser login page. The
+generated administrator username is `workwife`; engineers use their configured
+email address.
+
+Mailpit UI accounts are declared in the gitignored
+`terraform/environments/prod/prod.secrets.auto.tfvars` file as the sensitive
+`mailpit_ui_accounts` map. Terraform combines those engineer accounts with the
+generated `workwife` administrator and stores only the resulting JSON in the
+standard-tier SSM SecureString `/workwife/prod/mailpit/ui_accounts`. The host
+refreshes its authentication file every 30 minutes. Add or remove an engineer
+in that map and apply the production Terraform; never place a real password in
+the tracked example file.
+
+Retrieve the generated `workwife` password only when needed:
+
+```bash
+aws-vault exec ece-prod -- aws ssm get-parameter \
+  --name /workwife/prod/mailpit/ui_accounts \
+  --with-decryption \
+  --query Parameter.Value \
+  --output text | jq -r '.workwife'
+```
+
+Mailpit runs on an on-demand `t4g.nano` with an encrypted 8 GiB root volume.
+There is no load balancer, NAT gateway, SSH ingress, or CloudWatch log
+ingestion. Caddy terminates HTTPS automatically, SSM Session Manager is the
+only administrative entry point, and Mailpit accepts SMTP only for
+`@mailpit.workwife.app`. Captured messages are testing data, capped at 5,000
+messages and retained for at most 30 days; they are not a production archive.
+
+The same domain is verified as an SES identity in both the development and
+production AWS accounts. This allows either sandboxed SES account to deliver
+test messages to any `<anything>@mailpit.workwife.app` recipient. Terraform
+publishes both accounts' verification and DKIM records in the production Route
+53 zone. The MX record still points directly to Mailpit and must not be replaced
+with an SES inbound receipt endpoint.
+
 ## Prerequisites
 
 - Terraform 1.5 or newer;
@@ -116,6 +161,35 @@ is expired, complete the device authorization shown by `aws-vault` and rerun
 the identity command.
 
 ## Terraform workflow
+
+### AWS organisation recovery
+
+The management-account stack uses account `058755926944`, profile `ece-root`,
+and the original state at
+`s3://ece-tfstate-058755926944/infra-core/dev/terraform.tfstate`. Resource module
+names are preserved, so moving source does not recreate accounts or SSO users.
+The recovered configuration was checked against that state and produced a
+no-change plan. The actual `organisation.tfvars` is gitignored to avoid
+publishing engineer identities in this public infrastructure repository.
+
+```bash
+aws-vault exec ece-root -- terraform -chdir=terraform/environments/organisation init
+aws-vault exec ece-root -- terraform -chdir=terraform/environments/organisation plan -var-file=organisation.tfvars
+```
+
+For recovery on another machine, restore the variable file from the private
+`ece-core-infra` source or management state, then review the plan. Keep the state
+key unchanged; do not run the old and new checkouts concurrently. AWS accounts
+have `prevent_destroy`. Setting `create_organization=true` supports an empty
+management account without first evaluating an absent-organisation data source.
+
+Initial management-account access, the remote-state buckets, and enabling the
+organization instance of IAM Identity Center are bootstrap prerequisites.
+AWS documents enabling that organization instance through the management
+console: https://docs.aws.amazon.com/singlesignon/latest/userguide/identity-center-and-orgs.html
+After that, Terraform provisions OUs/accounts, SSO users/groups/permission sets,
+and the separate dev/prod application stacks. No organisational changes were
+applied while recovering this source.
 
 State is separated by account:
 

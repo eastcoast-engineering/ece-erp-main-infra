@@ -2,6 +2,8 @@ environment = "dev"
 root_domain = "workwife.app"
 sub_domain  = "dev"
 
+email_domain = "mailpit.workwife.app"
+
 frontend_github_repo             = "eastcoast-engineering/ece-erp-main-frontend"
 frontend_github_branch           = "dev"
 frontend_github_subject_override = "repo:eastcoast-engineering@247177585/ece-erp-main-frontend@1157935426:ref:refs/heads/dev"
@@ -45,13 +47,14 @@ database_public = true
 database_public_cidrs = [
   "104.28.160.62/32",
   "102.64.68.146/32",
-  "104.28.164.87/32"
+  "104.28.164.87/32",
+  "102.64.68.149/32",
 ]
 
-database_name                      = "quotashark"
-database_username                  = "quotashark_admin"
+database_name                      = "workwife"
+database_username                  = "workwife_admin"
 database_engine_version            = "16"
-database_instance_class            = "db.t4g.micro"
+database_instance_class            = "db.t3.micro"
 database_allocated_storage         = 20
 database_max_allocated_storage     = 0
 database_backup_retention_days     = 0

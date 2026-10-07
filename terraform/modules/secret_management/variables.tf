@@ -8,8 +8,14 @@ variable "environment" {
   type        = string
 }
 
+variable "namespace" {
+  description = "Service namespace used in parameter paths and tags."
+  type        = string
+  default     = "backend"
+}
+
 variable "parameter_values" {
-  description = "Sensitive backend values stored as SSM SecureString parameters."
+  description = "Sensitive service values stored as SSM SecureString parameters."
   type        = map(string)
   sensitive   = true
   default     = {}

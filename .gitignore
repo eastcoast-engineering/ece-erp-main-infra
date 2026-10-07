@@ -4,3 +4,4 @@
 crash.log
 terraform.tfvars
 *.secrets.auto.tfvars
+/terraform/environments/organisation/organisation.tfvars
