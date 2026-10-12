@@ -82,6 +82,17 @@ The task also receives:
   a separately verified sender mailbox, and `AWS_SES_FROM_EMAIL`;
 - `APP_ENV` and `RUST_LOG` for environment-specific behavior.
 
+Google sign-in for the personal Email Client uses the same server-side Google
+OAuth client credentials as Authentication, with a separate callback URI. Set
+`EMAIL_CLIENT_GOOGLE_OAUTH_REDIRECT_URI` in each environment and register that
+exact URL in the Google OAuth client's authorized redirect URIs:
+
+- Development: `https://api.dev.workwife.app/email-client/oauth2/callback`
+- Production: `https://api.workwife.app/email-client/oauth2/callback`
+
+Do not rely on deriving this callback from `OAUTH_GOOGLE_REDIRECT_URI`; Google
+requires the exact callback URL to be authorized for the OAuth client.
+
 The ECS task role supplies AWS credentials through the default AWS provider
 chain. Do not add static access keys to Terraform, ECS, or GitHub.
 
