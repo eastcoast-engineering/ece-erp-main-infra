@@ -212,6 +212,12 @@ variable "ses_additional_sender_identity_arns" {
   default     = []
 }
 
+variable "ses_sandbox_recipient_identity_arns" {
+  description = "Verified SES sandbox recipients allowed only with the configured application From address."
+  type        = list(string)
+  default     = []
+}
+
 variable "ecr_force_delete" {
   description = "Whether Terraform may delete a non-empty ECR repository."
   type        = bool

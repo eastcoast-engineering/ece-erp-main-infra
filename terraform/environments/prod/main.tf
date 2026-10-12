@@ -108,8 +108,9 @@ module "mailpit" {
 }
 
 module "mailpit_ses_identity" {
-  source = "../../modules/ses_recipient_identity"
-  domain = var.mailpit_domain
+  source          = "../../modules/ses_recipient_identity"
+  domain          = var.mailpit_domain
+  email_addresses = var.ses_test_recipient_emails
 }
 
 resource "aws_route53_record" "mailpit_ses_verification" {
