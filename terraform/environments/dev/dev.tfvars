@@ -5,6 +5,7 @@ sub_domain  = "dev"
 email_domain = "mailpit.workwife.app"
 
 ses_test_recipient_emails = [
+  "myoungtommy@gmail.com",
   "mryoungtommy@gmail.com",
   "tom.kidumbuyo@gmail.com",
   "angeladolberth@gmail.com",

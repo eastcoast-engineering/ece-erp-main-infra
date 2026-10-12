@@ -115,7 +115,8 @@ Check status without sending another verification email:
 
 ```bash
 aws ses get-identity-verification-attributes --profile ece-dev --region us-east-1 \
-  --identities mryoungtommy@gmail.com tom.kidumbuyo@gmail.com angeladolberth@gmail.com
+  --identities myoungtommy@gmail.com mryoungtommy@gmail.com \
+  tom.kidumbuyo@gmail.com angeladolberth@gmail.com
 ```
 
 Use `ece-prod` for the separate production-account check. If an identity already
