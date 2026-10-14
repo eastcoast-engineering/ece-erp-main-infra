@@ -42,6 +42,7 @@ backend_container_environment = {
   FRONTEND_OAUTH_CALLBACK_URL                  = "https://dev.workwife.app/auth/login"
   OAUTH_GOOGLE_CLIENT_ID                       = "459345544672-in05gmjmjh76ggrm1me75t70hsh6e52n.apps.googleusercontent.com"
   OAUTH_GOOGLE_REDIRECT_URI                    = "https://api.dev.workwife.app/auth/oauth2/google/callback"
+  EMAIL_CLIENT_GOOGLE_OAUTH_REDIRECT_URI       = "https://api.dev.workwife.app/email-client/oauth2/callback"
   OAUTH_LINKEDIN_CLIENT_ID                     = "77ghsbh5oh9jcw"
   OAUTH_LINKEDIN_REDIRECT_URI                  = "https://api.dev.workwife.app/auth/oauth2/linkedin/callback"
   COUNTRY_STATE_CITY_API_URL                   = "https://api.countrystatecity.in/v1"
